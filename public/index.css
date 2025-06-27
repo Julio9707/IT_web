@@ -1,0 +1,73 @@
+/* ========================================
+   IT資產管理系統 - 首頁樣式
+   ======================================== */
+
+/* 全域頁面設定 */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif; /* 設定字體，與其他頁面保持一致 */
+    background: #f4f6fa; /* 淺灰色背景，提供良好的視覺層次 */
+    margin: 0; /* 移除預設邊距 */
+    padding: 0; /* 移除預設內距 */
+}
+
+/* 頁面標題樣式 */
+h1 {
+    background: #2d3e50; /* 深藍色背景，與系統主題色一致 */
+    color: #fff; /* 白色文字 */
+    margin: 0; /* 移除邊距 */
+    padding: 20px; /* 內距 */
+    text-align: center; /* 文字置中 */
+}
+
+/* 主要內容區塊 */
+section {
+    margin: 30px auto; /* 上下邊距，左右自動置中 */
+    max-width: 800px; /* 最大寬度限制，適合內容顯示 */
+    background: #fff; /* 白色背景 */
+    border-radius: 8px; /* 圓角效果 */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07); /* 陰影效果，增加立體感 */
+    padding: 24px; /* 內距 */
+}
+
+/* 資產清單表格 */
+table {
+    width: 100%; /* 全寬 */
+    border-collapse: collapse; /* 合併邊框 */
+    margin-top: 16px; /* 上方邊距 */
+}
+
+/* 表格標題和資料格 */
+th, td {
+    border: 1px solid #e0e0e0; /* 邊框 */
+    padding: 10px; /* 內距 */
+    text-align: left; /* 文字左對齊 */
+}
+
+/* 表格標題背景 */
+th {
+    background: #f0f2f5; /* 淺灰色背景，區分標題和資料 */
+}
+
+/* 表格偶數行背景 */
+tr:nth-child(even) {
+    background: #f9f9f9; /* 淺灰色背景，提高可讀性 */
+}
+
+/* 登入管理按鈕 */
+#login-btn {
+    display: block; /* 區塊顯示 */
+    margin: 30px auto 0 auto; /* 上方邊距，左右自動置中 */
+    padding: 10px 30px; /* 內距 */
+    background: #2d3e50; /* 深藍色背景，與系統主題一致 */
+    color: #fff; /* 白色文字 */
+    border: none; /* 移除邊框 */
+    border-radius: 5px; /* 圓角 */
+    font-size: 1.1em; /* 字體大小，稍微大於一般文字 */
+    cursor: pointer; /* 滑鼠指標變為手型 */
+    transition: background 0.2s; /* 背景色變化的過渡動畫 */
+}
+
+/* 登入按鈕懸停效果 */
+#login-btn:hover {
+    background: #1a2533; /* 懸停時的深色背景 */
+} 

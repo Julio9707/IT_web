@@ -1,0 +1,267 @@
+/* ========================================
+   IT資產管理系統 - 管理頁面樣式
+   ======================================== */
+
+/* 全域頁面設定 */
+body {
+  font-family: 'Segoe UI', Arial, sans-serif; /* 設定字體，優先使用 Segoe UI */
+  background: #f4f6fa; /* 淺灰色背景，提供良好的視覺層次 */
+  margin: 0; /* 移除預設邊距 */
+  padding: 0; /* 移除預設內距 */
+}
+.manage-container {
+  display: flex; /* 水平排列側邊欄和主要內容 */
+  min-height: 100vh; /* 確保容器至少佔滿整個視窗高度 */
+}
+.sidebar {
+  width: 180px; /* 固定寬度 */
+  background: #f5f6fa; /* 淺藍灰色背景，與主內容區分 */
+  border-right: 1px solid #ddd; /* 右側分隔線 */
+  padding: 32px 0 0 0; /* 上方內距，為標題留空間 */
+  box-sizing: border-box; /* 包含邊框和內距在寬度計算中 */
+  min-height: 100vh; /* 確保側邊欄至少佔滿整個視窗高度 */
+}
+.sidebar-list {
+  list-style: none; /* 移除預設的項目符號 */
+  padding: 0; /* 移除預設內距 */
+  margin: 24px 0 0 0; /* 上方邊距，與標題保持距離 */
+}
+.sidebar-list li {
+  margin-bottom: 16px; /* 項目之間的垂直間距 */
+}
+.sidebar .tab-btn {
+  width: 90%; /* 按鈕寬度，留出左右邊距 */
+  padding: 10px 0; /* 上下內距 */
+  border: none; /* 移除預設邊框 */
+  background: #e1e7ef; /* 淺藍色背景 */
+  border-radius: 6px; /* 圓角效果 */
+  font-size: 1em; /* 字體大小 */
+  cursor: pointer; /* 滑鼠指標變為手型 */
+  transition: background 0.2s; /* 背景色變化的過渡動畫 */
+}
+.sidebar .tab-btn:hover, .sidebar .tab-btn.active {
+  background: #b2becd; /* 懸停時的深色背景 */
+  color: #222; /* 深色文字，提高對比度 */
+}
+.main-content {
+  flex: 1; /* 佔據剩餘空間 */
+  padding: 32px 40px; /* 內距，提供內容與邊緣的距離 */
+  background: #fff; /* 白色背景 */
+  min-width: 0; /* 防止 flex 項目溢出 */
+}
+.top-bar {
+  display: flex; /* 水平排列標題和登出按鈕 */
+  justify-content: space-between; /* 兩端對齊 */
+  align-items: center; /* 垂直置中 */
+  margin-bottom: 32px; /* 下方邊距 */
+}
+#logout-btn {
+  background: #e74c3c; /* 紅色背景，表示危險操作 */
+  color: #fff; /* 白色文字 */
+  border: none; /* 移除邊框 */
+  padding: 8px 20px; /* 內距 */
+  border-radius: 5px; /* 圓角 */
+  font-size: 1em; /* 字體大小 */
+  cursor: pointer; /* 滑鼠指標 */
+  transition: background 0.2s; /* 過渡動畫 */
+}
+#logout-btn:hover {
+  background: #c0392b; /* 懸停時的深紅色 */
+}
+section {
+  margin: 30px auto; /* 上下邊距，左右自動置中 */
+  max-width: 900px; /* 最大寬度限制 */
+  background: #fff; /* 白色背景 */
+  border-radius: 8px; /* 圓角 */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07); /* 陰影效果，增加立體感 */
+  padding: 24px; /* 內距 */
+}
+form {
+  display: flex; /* 水平排列表單元素 */
+  gap: 10px; /* 元素間距 */
+  flex-wrap: wrap; /* 允許換行 */
+}
+form input, form select {
+  flex: 1 1 150px; /* 彈性佈局，最小寬度 150px */
+  padding: 8px; /* 內距 */
+  border: 1px solid #ccc; /* 邊框 */
+  border-radius: 4px; /* 圓角 */
+}
+form button {
+  padding: 8px 16px; /* 內距 */
+  background: #2d3e50; /* 深藍色背景 */
+  color: #fff; /* 白色文字 */
+  border: none; /* 移除邊框 */
+  border-radius: 4px; /* 圓角 */
+  cursor: pointer; /* 滑鼠指標 */
+}
+form button:hover {
+  background: #1a2533; /* 懸停時的深色背景 */
+}
+table {
+  width: 100%; /* 全寬 */
+  border-collapse: collapse; /* 合併邊框 */
+  margin-top: 16px; /* 上方邊距 */
+}
+th, td {
+  border: 1px solid #e0e0e0; /* 邊框 */
+  padding: 10px; /* 內距 */
+  text-align: left; /* 文字左對齊 */
+}
+th {
+  background: #f0f2f5; /* 淺灰色背景，區分標題和資料 */
+}
+tr:nth-child(even) {
+  background: #f9f9f9; /* 淺灰色背景，提高可讀性 */
+}
+.action-btn, .del-btn, .pw-btn {
+  background: #e74c3c; /* 紅色背景，表示危險操作 */
+  color: #fff; /* 白色文字 */
+  border: none; /* 移除邊框 */
+  border-radius: 4px; /* 圓角 */
+  padding: 4px 10px; /* 內距 */
+  cursor: pointer; /* 滑鼠指標 */
+}
+.action-btn:hover, .del-btn:hover, .pw-btn:hover {
+  background: #c0392b; /* 懸停時的深紅色 */
+}
+.edit-btn {
+  background: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin-right: 5px;
+  font-size: 1em;
+  vertical-align: middle;
+}
+.edit-btn:hover {
+  background: #2980b9;
+}
+.role-select, .pw-input {
+  padding: 4px 8px; /* 內距 */
+  border-radius: 4px; /* 圓角 */
+  border: 1px solid #ccc; /* 邊框 */
+}
+
+/* ========================================
+   成功提示框樣式
+   ======================================== */
+
+/* 成功提示框確定按鈕懸停效果 */
+#success-ok-btn:hover {
+  background: #45a049 !important; /* 懸停時的深綠色 */
+  transform: translateY(-1px); /* 輕微上移效果 */
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3); /* 綠色陰影 */
+}
+
+/* 成功提示框動畫效果 */
+#success-modal {
+  animation: fadeIn 0.3s ease-out; /* 淡入動畫 */
+}
+
+#success-modal > div {
+  animation: slideIn 0.3s ease-out; /* 滑入動畫 */
+}
+
+/* 淡入動畫 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 滑入動畫 */
+@keyframes slideIn {
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, -60%); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translate(-50%, -50%); 
+  }
+}
+
+/* 資產清單表格欄寬調整 */
+#asset-table th:nth-child(1), #asset-table td:nth-child(1) {
+  width: 22%; /* 名稱欄位加大 */
+  min-width: 120px;
+}
+#asset-table th:nth-child(3), #asset-table td:nth-child(3) {
+  width: 26%; /* 用途欄位略縮小 */
+  min-width: 100px;
+}
+#asset-table th:nth-child(5), #asset-table td:nth-child(5) {
+  width: 70px; /* 操作欄位再縮小 */
+  min-width: 70px;
+  text-align: center;
+  white-space: nowrap;
+}
+#asset-table td:nth-child(5) .edit-btn,
+#asset-table td:nth-child(5) .action-btn {
+  display: inline-block;
+  margin-right: 6px;
+}
+#asset-table td:nth-child(5) .action-btn:last-child {
+  margin-right: 0;
+}
+
+/* 類型管理表格欄寬比例 1:2 */
+#tab-content-type th:nth-child(1), #tab-content-type td:nth-child(1) {
+  width: 33%;
+  min-width: 80px;
+}
+#tab-content-type th:nth-child(2), #tab-content-type td:nth-child(2) {
+  width: 67%;
+  min-width: 160px;
+}
+
+/* 類型管理表格操作欄寬度 */
+#tab-content-type th:last-child, #tab-content-type td:last-child {
+  width: 70px;
+  min-width: 70px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 帳號管理表格操作欄寬度 */
+#user-list-section th:last-child, #user-list-section td:last-child {
+  width: 70px;
+  min-width: 70px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 角色管理表格操作欄寬度 */
+#role-list-section th:last-child, #role-list-section td:last-child {
+  width: 70px;
+  min-width: 70px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 統一 modal actions 右下角 */
+.modal-actions {
+  position: absolute;
+  right: 32px;
+  bottom: 24px;
+  display: flex;
+  gap: 12px;
+  background: none;
+}
+
+.modal-actions button {
+  min-width: 70px;
+  padding: 8px 18px;
+  font-size: 1em;
+}
+
+/* 讓 modal padding-bottom 足夠，避免按鈕被遮住 */
+#edit-asset-modal > div,
+#edit-user-modal > div,
+#edit-role-modal > div,
+#edit-type-modal > div {
+  padding-bottom: 70px !important;
+  position: relative;
+} 

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT資產管理 - 管理頁</title>
+    <link rel="stylesheet" href="manage.css">
+</head>
+<body>
+    <div class="manage-container">
+        <aside class="sidebar">
+            <h2 style="font-size:1.1em;">功能選單</h2>
+            <ul class="sidebar-list">
+                <li><button class="tab-btn" id="tab-asset" data-tab="asset">資產管理</button></li>
+                <li><button class="tab-btn" id="tab-type" data-tab="type">類型管理</button></li>
+                <li><button class="tab-btn" id="tab-user" data-tab="user">帳號管理</button></li>
+                <li><button class="tab-btn" id="tab-role" data-tab="role">角色管理</button></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <div class="top-bar">
+                <h1 id="home-link" style="cursor:pointer;">IT資產管理 - 管理頁</h1>
+                <button id="logout-btn">登出</button>
+            </div>
+            <section id="tab-content-asset">
+                <h2>資產管理</h2>
+                <section id="asset-form-section">
+                    <h3>新增資產</h3>
+                    <form id="asset-form">
+                        <input type="text" id="name" placeholder="資產名稱" required>
+                        <select id="type" required>
+                            <option value="">請選擇資產類型</option>
+                        </select>
+                        <input type="text" id="owner" placeholder="用途" required>
+                        <input type="text" id="location" placeholder="位置" required>
+                        <button type="submit">新增</button>
+                    </form>
+                </section>
+                <section id="asset-list-section">
+                    <h3>資產清單</h3>
+                    <table id="asset-table">
+                        <thead>
+                            <tr>
+                                <th>名稱</th>
+                                <th>類型</th>
+                                <th>用途</th>
+                                <th>位置</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 資產資料將由JS動態插入 -->
+                        </tbody>
+                    </table>
+                </section>
+                
+                <!-- 編輯資產 Modal -->
+                <div id="edit-asset-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:400px;">
+                        <h3>編輯資產</h3>
+                        <form id="edit-asset-form">
+                            <input type="hidden" id="edit-asset-id">
+                            <div style="margin-bottom:15px;">
+                                <label>資產名稱：</label>
+                                <input type="text" id="edit-asset-name" required>
+                            </div>
+                            <div style="margin-bottom:15px;">
+                                <label>資產類型：</label>
+                                <select id="edit-asset-type" required>
+                                    <option value="">請選擇資產類型</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom:15px;">
+                                <label>用途：</label>
+                                <input type="text" id="edit-asset-owner" required>
+                            </div>
+                            <div style="margin-bottom:15px;">
+                                <label>位置：</label>
+                                <input type="text" id="edit-asset-location" required>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" onclick="closeEditAssetModal()" style="margin-right:10px;">取消</button>
+                                <button type="submit">確定</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- 成功提示框 -->
+                <div id="success-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px; border-radius:12px; min-width:300px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-bottom:20px;">
+                            <div style="width:60px; height:60px; background:#4CAF50; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center;">
+                                <span style="color:white; font-size:30px;">✓</span>
+                            </div>
+                            <h3 style="margin:0; color:#333; font-size:1.3em;">編輯成功</h3>
+                        </div>
+                        <button id="success-ok-btn" style="padding:10px 30px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
+                    </div>
+                </div>
+            </section>
+            <section id="tab-content-user" style="display:none;">
+                <h2>帳號管理</h2>
+                <div id="user-add-section">
+                    <form id="user-add-form">
+                        <input type="text" id="add-username" placeholder="帳號" required autocomplete="off">
+                        <input type="password" id="add-password" placeholder="密碼" required autocomplete="new-password">
+                        <select id="add-role" required>
+                            <option value="">請選擇角色</option>
+                        </select>
+                        <button type="submit">新增帳號</button>
+                    </form>
+                </div>
+                <div id="user-list-section">
+                    <!-- 帳號管理功能 -->
+                </div>
+                
+                <!-- 修改帳號 Modal -->
+                <div id="edit-user-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:300px;">
+                        <h3>編輯帳號</h3>
+                        <form id="edit-user-form">
+                            <input type="hidden" id="edit-user-id">
+                            <div style="margin-bottom:15px;">
+                                <label>帳號：</label>
+                                <span id="edit-username-display"></span>
+                            </div>
+                            <div style="margin-bottom:15px;">
+                                <label>權限：</label>
+                                <select id="edit-role" required>
+                                    <option value="">請選擇角色</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom:15px;">
+                                <label>新密碼：</label>
+                                <input type="password" id="edit-password" placeholder="留空表示不修改" autocomplete="new-password">
+                            </div>
+                            <div style="margin-bottom:15px;">
+                                <label>備註：</label>
+                                <input type="text" id="edit-remark" placeholder="備註">
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" onclick="closeEditModal()" style="margin-right:10px;">取消</button>
+                                <button type="submit">確定</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- 帳號編輯成功提示框 -->
+                <div id="user-success-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px; border-radius:12px; min-width:300px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-bottom:20px;">
+                            <div style="width:60px; height:60px; background:#4CAF50; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center;">
+                                <span style="color:white; font-size:30px;">✓</span>
+                            </div>
+                            <h3 style="margin:0; color:#333; font-size:1.3em;">編輯成功</h3>
+                        </div>
+                        <button id="user-success-ok-btn" style="padding:10px 30px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
+                    </div>
+                </div>
+            </section>
+            <section id="tab-content-role" style="display:none;">
+                <h2>角色管理</h2>
+                <div id="role-add-section">
+                    <h3>新增角色</h3>
+                    <form id="role-add-form">
+                        <input type="text" id="role-name" placeholder="角色名稱" required>
+                        <button type="submit">新增角色</button>
+                    </form>
+                </div>
+                <div id="role-list-section">
+                    <h3>角色列表</h3>
+                    <!-- 角色列表將由JS動態插入 -->
+                </div>
+                <!-- 編輯角色 Modal -->
+                <div id="edit-role-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:600px;">
+                        <h3>編輯角色</h3>
+                        <form id="edit-role-form">
+                            <input type="hidden" id="edit-role-id">
+                            <div style="display:flex; gap: 30px;">
+                                <!-- 左邊：基本設定 -->
+                                <div style="flex: 1;">
+                                    <div style="margin-bottom:15px;">
+                                        <label>角色名稱：</label>
+                                        <input type="text" id="edit-role-name" required style="width: 100%;">
+                                    </div>
+                                    <div style="margin-bottom:15px;">
+                                        <label>說明：</label>
+                                        <input type="text" id="edit-role-desc" style="width: 100%;">
+                                    </div>
+                                    <div style="margin-bottom:15px;">
+                                        <label>備註：</label>
+                                        <input type="text" id="edit-role-remark" style="width: 100%;">
+                                    </div>
+                                </div>
+                                <!-- 右邊：權限設定 -->
+                                <div style="flex: 1;">
+                                    <div style="margin-bottom:15px;">
+                                        <label>權限設定：</label>
+                                        <div id="edit-role-perms"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" onclick="closeEditRoleModal()" style="margin-right:10px;">取消</button>
+                                <button type="submit">確定</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- 角色編輯成功提示框 -->
+                <div id="role-success-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px; border-radius:12px; min-width:300px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-bottom:20px;">
+                            <div style="width:60px; height:60px; background:#4CAF50; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center;">
+                                <span style="color:white; font-size:30px;">✓</span>
+                            </div>
+                            <h3 style="margin:0; color:#333; font-size:1.3em;">編輯成功</h3>
+                        </div>
+                        <button id="role-success-ok-btn" style="padding:10px 30px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
+                    </div>
+                </div>
+            </section>
+            <section id="tab-content-type" style="display:none;">
+                <h2>類型管理</h2>
+                <div id="type-add-section">
+                    <h3>新增類型</h3>
+                    <form id="type-add-form">
+                        <input type="text" id="type-name" placeholder="類型名稱" required>
+                        <input type="text" id="type-description" placeholder="類型描述">
+                        <button type="submit">新增類型</button>
+                    </form>
+                </div>
+                <div id="type-list-section">
+                    <h3>類型列表</h3>
+                    <!-- 類型列表將由JS動態插入 -->
+                </div>
+                <!-- 編輯類型 Modal -->
+                <div id="edit-type-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:400px;">
+                        <h3>編輯類型</h3>
+                        <form id="edit-type-form">
+                            <input type="hidden" id="edit-type-id">
+                            <div style="margin-bottom:15px;">
+                                <label>類型名稱：</label>
+                                <input type="text" id="edit-type-name" required>
+                            </div>
+                            <div style="margin-bottom:15px;">
+                                <label>描述：</label>
+                                <input type="text" id="edit-type-description">
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" onclick="closeEditTypeModal()" style="margin-right:10px;">取消</button>
+                                <button type="submit">確定</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- 類型編輯成功提示框 -->
+                <div id="type-success-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1001;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px; border-radius:12px; min-width:300px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-bottom:20px;">
+                            <div style="width:60px; height:60px; background:#4CAF50; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center;">
+                                <span style="color:white; font-size:30px;">✓</span>
+                            </div>
+                            <h3 style="margin:0; color:#333; font-size:1.3em;">編輯成功</h3>
+                        </div>
+                        <button id="type-success-ok-btn" style="padding:10px 30px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="manage.js"></script>
+</body>
+</html> 
