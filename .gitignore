@@ -44,4 +44,4 @@ todo.txt
 /target/
 /node_modules/
 /web/node_modules/
-
+/log/

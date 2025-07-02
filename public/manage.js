@@ -96,18 +96,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 登出功能
     const logoutBtn = document.getElementById('logout-btn');
+    const logoutModal = document.getElementById('logout-confirm-modal');
+    const logoutCancelBtn = document.getElementById('logout-cancel-btn');
+    const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
     logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('login');
-        localStorage.removeItem('role');
-        localStorage.removeItem('permissions');
-        localStorage.removeItem('currentTab');
-        window.location.href = 'login.html';
+        logoutModal.style.display = 'block';
     });
+    if (logoutCancelBtn) {
+        logoutCancelBtn.onclick = function() {
+            logoutModal.style.display = 'none';
+        };
+    }
+    if (logoutConfirmBtn) {
+        logoutConfirmBtn.onclick = function() {
+            localStorage.removeItem('login');
+            localStorage.removeItem('role');
+            localStorage.removeItem('permissions');
+            localStorage.removeItem('currentTab');
+            window.location.href = 'login.html';
+        };
+    }
 
     // 資產管理功能
     const assetTableBody = document.querySelector('#asset-table tbody');
     const assetForm = document.getElementById('asset-form');
     const assetTypeSelect = document.getElementById('type');
+
+    let allAssets = [];
+
+    function loadAssets() {
+        fetch('/api/assets')
+            .then(res => res.json())
+            .then(data => {
+                allAssets = data;
+                renderAssetTable();
+                updateAssetTypeFilterOptions();
+            });
+    }
+
+    function renderAssetTable() {
+        const filterValue = document.getElementById('asset-type-filter-select')?.value || '';
+        assetTableBody.innerHTML = '';
+        let filteredAssets = allAssets;
+        if (filterValue) {
+            filteredAssets = allAssets.filter(asset => asset.type === filterValue);
+        }
+        filteredAssets.forEach((asset, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style=\"width:20px; text-align:center;\">${idx + 1}</td>
+                <td>${asset.name}</td>
+                <td>${asset.type}</td>
+                <td>${asset.owner}</td>
+                <td>${asset.location}</td>
+                <td>
+                    <button class=\"edit-btn\" onclick=\"editAsset(${idx}, '${asset.name}', '${asset.type}', '${asset.owner}', '${asset.location}')\">編輯</button>
+                    ${hasPermission('canDeleteAsset') ? `<button class=\"action-btn\" onclick=\"deleteAsset(${idx})\">刪除</button>` : ''}
+                </td>
+            `;
+            assetTableBody.appendChild(tr);
+        });
+    }
+
+    function updateAssetTypeFilterOptions() {
+        const filterSelect = document.getElementById('asset-type-filter-select');
+        if (!filterSelect) return;
+        const current = filterSelect.value;
+        filterSelect.innerHTML = '<option value="">全部類型</option>';
+        const types = [...new Set(allAssets.map(a => a.type))];
+        types.forEach(type => {
+            const opt = document.createElement('option');
+            opt.value = type;
+            opt.textContent = type;
+            filterSelect.appendChild(opt);
+        });
+        filterSelect.value = current;
+    }
+
+    document.getElementById('asset-type-filter-select')?.addEventListener('change', renderAssetTable);
 
     // 載入資產類型到下拉選單
     function loadAssetTypes() {
@@ -120,30 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     option.value = type.name;
                     option.textContent = type.name;
                     assetTypeSelect.appendChild(option);
-                });
-            });
-    }
-
-    // 載入資產清單
-    function loadAssets() {
-        fetch('/api/assets')
-            .then(res => res.json())
-            .then(data => {
-                assetTableBody.innerHTML = '';
-                data.forEach((asset, idx) => {
-                    const tr = document.createElement('tr');
-                    const canDelete = hasPermission('canDeleteAsset');
-                    tr.innerHTML = `
-                        <td>${asset.name}</td>
-                        <td>${asset.type}</td>
-                        <td>${asset.owner}</td>
-                        <td>${asset.location}</td>
-                        <td>
-                            <button class="edit-btn" onclick="editAsset(${idx}, '${asset.name}', '${asset.type}', '${asset.owner}', '${asset.location}')">編輯</button>
-                            ${canDelete ? `<button class="action-btn" onclick="deleteAsset(${idx})">刪除</button>` : ''}
-                        </td>
-                    `;
-                    assetTableBody.appendChild(tr);
                 });
             });
     }
@@ -168,6 +210,45 @@ document.addEventListener('DOMContentLoaded', () => {
             loadAssets();
         });
     });
+
+    // 資產刪除彈窗控制
+    let assetToDeleteIdx = null;
+    const deleteAssetModal = document.getElementById('delete-asset-modal');
+    const deleteAssetCancelBtn = document.getElementById('delete-asset-cancel-btn');
+    const deleteAssetConfirmBtn = document.getElementById('delete-asset-confirm-btn');
+
+    window.deleteAsset = function(idx) {
+        assetToDeleteIdx = idx;
+        deleteAssetModal.style.display = 'block';
+    }
+    if (deleteAssetCancelBtn) {
+        deleteAssetCancelBtn.onclick = function() {
+            deleteAssetModal.style.display = 'none';
+            assetToDeleteIdx = null;
+        }
+    }
+    if (deleteAssetConfirmBtn) {
+        deleteAssetConfirmBtn.onclick = function() {
+            if (assetToDeleteIdx !== null) {
+                fetch(`/api/assets/${assetToDeleteIdx}`, { method: 'DELETE' })
+                    .then(res => res.json())
+                    .then(() => {
+                        loadAssets();
+                        deleteAssetModal.style.display = 'none';
+                        assetToDeleteIdx = null;
+                    });
+            }
+        }
+    }
+
+    // 資產新增成功彈窗控制
+    const addAssetSuccessModal = document.getElementById('add-asset-success-modal');
+    const addAssetSuccessOkBtn = document.getElementById('add-asset-success-ok-btn');
+    if (addAssetSuccessOkBtn) {
+        addAssetSuccessOkBtn.onclick = function() {
+            addAssetSuccessModal.style.display = 'none';
+        }
+    }
 
     // 編輯資產表單處理
     const editAssetForm = document.getElementById('edit-asset-form');
@@ -210,13 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const successOkBtn = document.getElementById('success-ok-btn');
     if (successOkBtn) {
         successOkBtn.addEventListener('click', closeSuccessModal);
-    }
-
-    // 刪除資產（全域函式）
-    window.deleteAsset = function(idx) {
-        fetch(`/api/assets/${idx}`, { method: 'DELETE' })
-            .then(res => res.json())
-            .then(() => loadAssets());
     }
 
     // 編輯資產（全域函式）
@@ -308,11 +382,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 刪除帳號（全域函式）
     window.deleteUser = function(id) {
-        if (confirm('確定要刪除此帳號？')) {
+        const modal = document.getElementById('delete-user-modal');
+        const cancelBtn = document.getElementById('delete-user-cancel-btn');
+        const confirmBtn = document.getElementById('delete-user-confirm-btn');
+        modal.style.display = 'block';
+        function close() { modal.style.display = 'none'; cancelBtn.removeEventListener('click', onCancel); confirmBtn.removeEventListener('click', onConfirm); }
+        function onCancel() { close(); }
+        function onConfirm() {
             fetch(`/api/users/${id}`, { method: 'DELETE' })
                 .then(res => res.json())
-                .then(() => loadUsers());
+                .then(() => { close(); loadUsers(); });
         }
+        cancelBtn.addEventListener('click', onCancel);
+        confirmBtn.addEventListener('click', onConfirm);
     }
 
     // 編輯帳號表單處理
@@ -473,14 +555,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 刪除角色（全域函式）
     window.deleteRole = function(id) {
-        if (confirm('確定要刪除此角色？')) {
+        const modal = document.getElementById('delete-role-modal');
+        const cancelBtn = document.getElementById('delete-role-cancel-btn');
+        const confirmBtn = document.getElementById('delete-role-confirm-btn');
+        modal.style.display = 'block';
+        function close() { modal.style.display = 'none'; cancelBtn.removeEventListener('click', onCancel); confirmBtn.removeEventListener('click', onConfirm); }
+        function onCancel() { close(); }
+        function onConfirm() {
             fetch(`/api/roles/${id}`, { method: 'DELETE' })
                 .then(res => res.json())
-                .then(() => {
-                    loadRoles();
-                    loadRoleOptions(); // 重新載入角色選項
-                });
+                .then(() => { close(); loadRoles(); loadRoleOptions(); });
         }
+        cancelBtn.addEventListener('click', onCancel);
+        confirmBtn.addEventListener('click', onConfirm);
     }
 
     // 編輯角色（全域函式）
@@ -642,13 +729,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 刪除類型（全域函式）
     window.deleteType = function(id) {
-        if (confirm('確定要刪除此類型？')) {
+        const modal = document.getElementById('delete-type-modal');
+        const cancelBtn = document.getElementById('delete-type-cancel-btn');
+        const confirmBtn = document.getElementById('delete-type-confirm-btn');
+        modal.style.display = 'block';
+        function close() { modal.style.display = 'none'; cancelBtn.removeEventListener('click', onCancel); confirmBtn.removeEventListener('click', onConfirm); }
+        function onCancel() { close(); }
+        function onConfirm() {
             fetch(`/api/asset-types/${id}`, { method: 'DELETE' })
                 .then(res => res.json())
-                .then(() => {
-                    loadTypes();
-                    loadAssetTypes();
+                .then(() => { close(); loadTypes(); loadAssetTypes(); });
+        }
+        cancelBtn.addEventListener('click', onCancel);
+        confirmBtn.addEventListener('click', onConfirm);
+    }
+
+    // 排序功能彈窗
+    const openSortModalBtn = document.getElementById('open-sort-modal-btn');
+    const sortModal = document.getElementById('sort-modal');
+    const sortList = document.getElementById('sort-list');
+    const sortCancelBtn = document.getElementById('sort-cancel-btn');
+    const sortConfirmBtn = document.getElementById('sort-confirm-btn');
+    let currentSortAssets = [];
+    let sortableInstance = null;
+
+    if (openSortModalBtn) {
+        openSortModalBtn.addEventListener('click', () => {
+            fetch('/api/assets')
+                .then(res => res.json())
+                .then(data => {
+                    currentSortAssets = data;
+                    sortList.innerHTML = '';
+                    data.forEach(asset => {
+                        const li = document.createElement('li');
+                        li.textContent = `${asset.name}（${asset.type}）`;
+                        li.setAttribute('data-id', asset.id);
+                        li.style.padding = '8px 12px';
+                        li.style.border = '1px solid #ddd';
+                        li.style.marginBottom = '6px';
+                        li.style.background = '#fafbfc';
+                        li.style.cursor = 'move';
+                        sortList.appendChild(li);
+                    });
+                    Sortable.create(sortList, {
+                        animation: 150,
+                        handle: 'li',
+                    });
+                    sortModal.style.display = 'block';
                 });
+        });
+    }
+    if (sortCancelBtn) {
+        sortCancelBtn.onclick = function() {
+            sortModal.style.display = 'none';
+            sortList.innerHTML = '';
+        }
+    }
+    if (sortConfirmBtn) {
+        sortConfirmBtn.onclick = function() {
+            const newOrder = Array.from(sortList.children).map((li, i) => ({
+                id: parseInt(li.getAttribute('data-id')), display_order: i + 1
+            }));
+            fetch('/api/assets/order', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newOrder)
+            }).then(() => {
+                sortModal.style.display = 'none';
+                sortList.innerHTML = '';
+                loadAssets();
+            });
         }
     }
 

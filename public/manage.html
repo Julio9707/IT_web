@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT資產管理 - 管理頁</title>
     <link rel="stylesheet" href="manage.css">
+    <link rel="icon" type="image/png" href="logo.png">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
     <div class="manage-container">
@@ -37,10 +39,18 @@
                     </form>
                 </section>
                 <section id="asset-list-section">
-                    <h3>資產清單</h3>
+                    <div style="margin-bottom:8px;">
+                        <h3 style="margin:0;">資產清單</h3>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+                            <button id="open-sort-modal-btn">排序功能</button>
+                            <div style="flex:1"></div>
+                            <select id="asset-type-filter-select" style="min-width:120px;"><option value="">全部類型</option></select>
+                        </div>
+                    </div>
                     <table id="asset-table">
                         <thead>
                             <tr>
+                                <th>順序</th>
                                 <th>名稱</th>
                                 <th>類型</th>
                                 <th>用途</th>
@@ -61,21 +71,21 @@
                         <form id="edit-asset-form">
                             <input type="hidden" id="edit-asset-id">
                             <div style="margin-bottom:15px;">
-                                <label>資產名稱：</label>
+                                <label style="margin-right:8px;">資產名稱：</label>
                                 <input type="text" id="edit-asset-name" required>
                             </div>
                             <div style="margin-bottom:15px;">
-                                <label>資產類型：</label>
+                                <label style="margin-right:8px;">資產類型：</label>
                                 <select id="edit-asset-type" required>
                                     <option value="">請選擇資產類型</option>
                                 </select>
                             </div>
                             <div style="margin-bottom:15px;">
-                                <label>用途：</label>
+                                <label style="margin-right:8px;">用途：</label>
                                 <input type="text" id="edit-asset-owner" required>
                             </div>
                             <div style="margin-bottom:15px;">
-                                <label>位置：</label>
+                                <label style="margin-right:8px;">位置：</label>
                                 <input type="text" id="edit-asset-location" required>
                             </div>
                             <div class="modal-actions">
@@ -96,6 +106,34 @@
                             <h3 style="margin:0; color:#333; font-size:1.3em;">編輯成功</h3>
                         </div>
                         <button id="success-ok-btn" style="padding:10px 30px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
+                    </div>
+                </div>
+
+                <!-- 資產刪除確認 Modal -->
+                <div id="delete-asset-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px 36px 32px 36px; border-radius:12px; min-width:340px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-bottom:18px;">
+                            <div style="width:54px; height:54px; background:#F44336; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center;">
+                                <span style="color:white; font-size:28px;">&#9888;</span>
+                            </div>
+                            <h3 style="margin:0; color:#F44336; font-size:1.2em;">確定要刪除此資產？</h3>
+                        </div>
+                        <div class="modal-actions" style="position:static; justify-content:center; gap:18px; margin-top:0;">
+                            <button id="delete-asset-cancel-btn" type="button" style="margin-right:10px; padding:8px 24px; background:#eee; color:#333; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">取消</button>
+                            <button id="delete-asset-confirm-btn" type="button" style="padding:8px 24px; background:#F44336; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定刪除</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 排序彈窗 -->
+                <div id="sort-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:400px; min-height:300px;">
+                        <h3 style="margin-top:0;">拖曳調整資產順序</h3>
+                        <ul id="sort-list" style="list-style:none; padding:0; margin:0 0 20px 0; max-height:300px; overflow:auto;"></ul>
+                        <div style="text-align:right;">
+                            <button id="sort-cancel-btn" type="button" style="margin-right:10px; padding:8px 24px; background:#eee; color:#333; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">取消</button>
+                            <button id="sort-confirm-btn" type="button" style="padding:8px 24px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -156,6 +194,22 @@
                             <h3 style="margin:0; color:#333; font-size:1.3em;">編輯成功</h3>
                         </div>
                         <button id="user-success-ok-btn" style="padding:10px 30px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
+                    </div>
+                </div>
+
+                <!-- 帳號刪除確認 Modal -->
+                <div id="delete-user-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px 36px 32px 36px; border-radius:12px; min-width:340px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-bottom:18px;">
+                            <div style="width:54px; height:54px; background:#F44336; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center;">
+                                <span style="color:white; font-size:28px;">&#9888;</span>
+                            </div>
+                            <h3 style="margin:0; color:#F44336; font-size:1.2em;">確定要刪除此帳號？</h3>
+                        </div>
+                        <div class="modal-actions" style="position:static; justify-content:center; gap:18px; margin-top:0;">
+                            <button id="delete-user-cancel-btn" type="button" style="margin-right:10px; padding:8px 24px; background:#eee; color:#333; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">取消</button>
+                            <button id="delete-user-confirm-btn" type="button" style="padding:8px 24px; background:#F44336; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定刪除</button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -221,6 +275,22 @@
                         <button id="role-success-ok-btn" style="padding:10px 30px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
                     </div>
                 </div>
+
+                <!-- 角色刪除確認 Modal -->
+                <div id="delete-role-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px 36px 32px 36px; border-radius:12px; min-width:340px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-bottom:18px;">
+                            <div style="width:54px; height:54px; background:#F44336; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center;">
+                                <span style="color:white; font-size:28px;">&#9888;</span>
+                            </div>
+                            <h3 style="margin:0; color:#F44336; font-size:1.2em;">確定要刪除此角色？</h3>
+                        </div>
+                        <div class="modal-actions" style="position:static; justify-content:center; gap:18px; margin-top:0;">
+                            <button id="delete-role-cancel-btn" type="button" style="margin-right:10px; padding:8px 24px; background:#eee; color:#333; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">取消</button>
+                            <button id="delete-role-confirm-btn" type="button" style="padding:8px 24px; background:#F44336; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定刪除</button>
+                        </div>
+                    </div>
+                </div>
             </section>
             <section id="tab-content-type" style="display:none;">
                 <h2>類型管理</h2>
@@ -269,7 +339,37 @@
                         <button id="type-success-ok-btn" style="padding:10px 30px; background:#4CAF50; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定</button>
                     </div>
                 </div>
+
+                <!-- 類型刪除確認 Modal -->
+                <div id="delete-type-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px 36px 32px 36px; border-radius:12px; min-width:340px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                        <div style="margin-bottom:18px;">
+                            <div style="width:54px; height:54px; background:#F44336; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center;">
+                                <span style="color:white; font-size:28px;">&#9888;</span>
+                            </div>
+                            <h3 style="margin:0; color:#F44336; font-size:1.2em;">確定要刪除此類型？</h3>
+                        </div>
+                        <div class="modal-actions" style="position:static; justify-content:center; gap:18px; margin-top:0;">
+                            <button id="delete-type-cancel-btn" type="button" style="margin-right:10px; padding:8px 24px; background:#eee; color:#333; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">取消</button>
+                            <button id="delete-type-confirm-btn" type="button" style="padding:8px 24px; background:#F44336; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定刪除</button>
+                        </div>
+                    </div>
+                </div>
             </section>
+            <div id="logout-confirm-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:4000;">
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:40px 36px 32px 36px; border-radius:12px; min-width:340px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+                    <div style="margin-bottom:18px;">
+                        <div style="width:54px; height:54px; background:#FFA726; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center;">
+                            <span style="color:white; font-size:28px;">&#9888;</span>
+                        </div>
+                        <h3 style="margin:0; color:#FFA726; font-size:1.2em;">確定要登出？</h3>
+                    </div>
+                    <div class="modal-actions" style="position:static; justify-content:center; gap:18px; margin-top:0;">
+                        <button id="logout-cancel-btn" type="button" style="margin-right:10px; padding:8px 24px; background:#eee; color:#333; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">取消</button>
+                        <button id="logout-confirm-btn" type="button" style="padding:8px 24px; background:#FFA726; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定登出</button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
     <script src="manage.js"></script>

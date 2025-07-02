@@ -185,12 +185,19 @@ tr:nth-child(even) {
 
 /* 資產清單表格欄寬調整 */
 #asset-table th:nth-child(1), #asset-table td:nth-child(1) {
-  width: 22%; /* 名稱欄位加大 */
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  text-align: center;
+}
+#asset-table th:nth-child(2), #asset-table td:nth-child(2) {
+  width: 22%;
   min-width: 120px;
 }
 #asset-table th:nth-child(3), #asset-table td:nth-child(3) {
-  width: 26%; /* 用途欄位略縮小 */
-  min-width: 100px;
+  width: 80px;
+  min-width: 60px;
+  text-align: left;
 }
 #asset-table th:nth-child(5), #asset-table td:nth-child(5) {
   width: 70px; /* 操作欄位再縮小 */
@@ -205,6 +212,13 @@ tr:nth-child(even) {
 }
 #asset-table td:nth-child(5) .action-btn:last-child {
   margin-right: 0;
+}
+#asset-table th:nth-child(6), #asset-table td:nth-child(6) {
+  width: 70px !important;
+  min-width: 70px !important;
+  max-width: 120px !important;
+  text-align: center;
+  white-space: nowrap;
 }
 
 /* 類型管理表格欄寬比例 1:2 */
