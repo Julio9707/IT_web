@@ -22,8 +22,15 @@ async function initDB() {
                 id INT IDENTITY(1,1) PRIMARY KEY,
                 username NVARCHAR(100) UNIQUE,
                 password NVARCHAR(100),
-                role NVARCHAR(20) DEFAULT 'user'
+                role NVARCHAR(20) DEFAULT 'user',
+                remark NVARCHAR(255)
             )
+        `);
+        // 若 users 表已存在但沒有 remark 欄位則新增
+        await sql.query(`
+            IF EXISTS (SELECT * FROM sysobjects WHERE name='users' AND xtype='U')
+            AND NOT EXISTS (SELECT * FROM syscolumns WHERE id=OBJECT_ID('users') AND name='remark')
+            ALTER TABLE users ADD remark NVARCHAR(255)
         `);
         // 插入 admin 帳號（如不存在）
         await sql.query(`

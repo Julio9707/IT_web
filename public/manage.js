@@ -389,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${user.remark || '-'}</td>
                             <td>
                                 <button class="edit-btn" onclick="editUser(${user.id}, '${user.username}', '${user.role}', '${user.remark ? user.remark.replace(/'/g, "&#39;") : ''}')">編輯</button>
-                                <button class="del-btn" onclick="deleteUser(${user.id})">刪除</button>
+                                ${user.username === 'admin' ? `<button class="del-btn" style="background:#ccc; color:#888; cursor:not-allowed;" disabled>刪除</button>` : `<button class="del-btn" onclick="deleteUser(${user.id})">刪除</button>`}
                             </td>
                         </tr>
                     `).join('') + '</tbody></table>';
@@ -403,6 +403,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-role').value = role;
         document.getElementById('edit-password').value = '';
         document.getElementById('edit-remark').value = remark || '';
+        // 權限欄位不可編輯（admin）
+        if (username === 'admin') {
+            document.getElementById('edit-role').disabled = true;
+        } else {
+            document.getElementById('edit-role').disabled = false;
+        }
         document.getElementById('edit-user-modal').style.display = 'block';
     }
 
@@ -556,8 +562,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <td>${role.description || '-'}</td>
                             <td>${role.remark || '-'}</td>
                             <td>
-                                <button class="edit-btn" onclick="editRole(${role.id})">編輯</button>
-                                <button class="del-btn" onclick="deleteRole(${role.id})">刪除</button>
+                                ${role.name === 'admin' ? '' : `
+                                    <button class="edit-btn" onclick="editRole(${role.id})">編輯</button>
+                                    <button class="del-btn" onclick="deleteRole(${role.id})">刪除</button>
+                                `}
                             </td>
                         </tr>
                     `).join('') + '</tbody></table>';
