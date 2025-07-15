@@ -15,6 +15,7 @@
             <ul class="sidebar-list">
                 <li><button class="tab-btn" id="tab-asset" data-tab="asset">資產管理</button></li>
                 <li><button class="tab-btn" id="tab-type" data-tab="type">類型管理</button></li>
+                <li><button class="tab-btn" id="tab-type-detail" data-tab="type-detail">類型詳細</button></li>
                 <li><button class="tab-btn" id="tab-user" data-tab="user">帳號管理</button></li>
                 <li><button class="tab-btn" id="tab-role" data-tab="role">角色管理</button></li>
             </ul>
@@ -65,34 +66,58 @@
                 </section>
                 
                 <!-- 編輯資產 Modal -->
-                <div id="edit-asset-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
-                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:400px;">
-                        <h3>編輯資產</h3>
-                        <form id="edit-asset-form">
-                            <input type="hidden" id="edit-asset-id">
-                            <div style="margin-bottom:15px;">
-                                <label style="margin-right:8px;">資產名稱：</label>
-                                <input type="text" id="edit-asset-name" required>
+                <div id="edit-asset-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); z-index:1000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:0; border-radius:10px; width:440px; max-height:70vh; position:relative; box-shadow:0 6px 24px rgba(0,0,0,0.13);">
+                        <!-- 標題欄 -->
+                        <div style="background:#f5f6fa; padding:18px 22px; border-bottom:1px solid #e5e7eb; border-radius:10px 10px 0 0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h3 style="margin:0; font-size:1.15em; font-weight:600; color:#222;">編輯資產</h3>
+                                <button onclick="closeEditAssetModal()" style="background:none; border:none; color:#888; font-size:18px; cursor:pointer; padding:4px; width:28px; height:28px; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#ececec'" onmouseout="this.style.background='none'">×</button>
                             </div>
-                            <div style="margin-bottom:15px;">
-                                <label style="margin-right:8px;">資產類型：</label>
-                                <select id="edit-asset-type" required>
-                                    <option value="">請選擇資產類型</option>
-                                </select>
-                            </div>
-                            <div style="margin-bottom:15px;">
-                                <label style="margin-right:8px;">用途：</label>
-                                <input type="text" id="edit-asset-owner" required>
-                            </div>
-                            <div style="margin-bottom:15px;">
-                                <label style="margin-right:8px;">位置：</label>
-                                <input type="text" id="edit-asset-location" required>
-                            </div>
-                            <div class="modal-actions">
-                                <button type="button" onclick="closeEditAssetModal()" style="margin-right:10px;">取消</button>
-                                <button type="submit">確定</button>
-                            </div>
-                        </form>
+                        </div>
+                        
+                        <!-- 內容區域 -->
+                        <div style="padding:22px 22px 18px 22px; overflow-y:auto; max-height:calc(70vh - 120px);">
+                            <form id="edit-asset-form">
+                                <input type="hidden" id="edit-asset-id">
+                                <!-- 上半部：基本欄位 -->
+                                <div style="margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #f0f1f3;">
+                                    <h4 style="margin:0 0 14px 0; color:#444; font-size:1em; font-weight:600;">基本資訊</h4>
+                                    <div style="display:flex; flex-direction:column; gap:13px;">
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">資產名稱</label>
+                                            <input type="text" id="edit-asset-name" required style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">資產類型</label>
+                                            <select id="edit-asset-type" required style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                                <option value="">請選擇資產類型</option>
+                                            </select>
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">用途</label>
+                                            <input type="text" id="edit-asset-owner" required style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">位置</label>
+                                            <input type="text" id="edit-asset-location" required style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 下半部：自訂規格 -->
+                                <div id="edit-asset-custom-fields-section" style="display:none; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #f0f1f3;">
+                                    <h4 style="margin:0 0 14px 0; color:#444; font-size:1em; font-weight:600;">自訂規格</h4>
+                                    <div id="edit-asset-custom-fields-list">
+                                        <!-- 自訂規格將在這裡動態顯示 -->
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- 按鈕區域 - 絕對定位在底部 -->
+                        <div style="position:absolute; bottom:0; left:0; right:0; background:#f5f6fa; padding:14px 22px; border-top:1px solid #e5e7eb; border-radius:0 0 10px 10px; display:flex; justify-content:flex-end; gap:8px;">
+                            <button type="button" onclick="closeEditAssetModal()" style="padding:7px 16px; background:white; color:#666; border:1px solid #d1d5db; border-radius:5px; font-size:14px; cursor:pointer; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#f0f1f3'; this.style.borderColor='#bfc4ca'" onmouseout="this.style.background='white'; this.style.borderColor='#d1d5db'">取消</button>
+                            <button type="submit" form="edit-asset-form" style="padding:7px 20px; background:#409eff; color:white; border:1px solid #409eff; border-radius:5px; font-size:14px; font-weight:500; cursor:pointer; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#2176bd'; this.style.borderColor='#2176bd'" onmouseout="this.style.background='#409eff'; this.style.borderColor='#409eff'">確定</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -154,34 +179,48 @@
                 </div>
                 
                 <!-- 修改帳號 Modal -->
-                <div id="edit-user-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
-                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:300px;">
-                        <h3>編輯帳號</h3>
-                        <form id="edit-user-form">
-                            <input type="hidden" id="edit-user-id">
-                            <div style="margin-bottom:15px;">
-                                <label>帳號：</label>
-                                <span id="edit-username-display"></span>
+                <div id="edit-user-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); z-index:1000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:0; border-radius:10px; width:440px; max-height:70vh; position:relative; box-shadow:0 6px 24px rgba(0,0,0,0.13);">
+                        <!-- 標題欄 -->
+                        <div style="background:#f5f6fa; padding:18px 22px; border-bottom:1px solid #e5e7eb; border-radius:10px 10px 0 0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h3 style="margin:0; font-size:1.15em; font-weight:600; color:#222;">編輯帳號</h3>
+                                <button onclick="closeEditModal()" style="background:none; border:none; color:#888; font-size:18px; cursor:pointer; padding:4px; width:28px; height:28px; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#ececec'" onmouseout="this.style.background='none'">×</button>
                             </div>
-                            <div style="margin-bottom:15px;">
-                                <label>權限：</label>
-                                <select id="edit-role" required>
-                                    <option value="">請選擇角色</option>
-                                </select>
-                            </div>
-                            <div style="margin-bottom:15px;">
-                                <label>新密碼：</label>
-                                <input type="password" id="edit-password" placeholder="留空表示不修改" autocomplete="new-password">
-                            </div>
-                            <div style="margin-bottom:15px;">
-                                <label>備註：</label>
-                                <input type="text" id="edit-remark" placeholder="備註">
-                            </div>
-                            <div class="modal-actions">
-                                <button type="button" onclick="closeEditModal()" style="margin-right:10px;">取消</button>
-                                <button type="submit">確定</button>
-                            </div>
-                        </form>
+                        </div>
+                        <!-- 內容區域 -->
+                        <div style="padding:22px 22px 18px 22px; overflow-y:auto; max-height:calc(70vh - 120px);">
+                            <form id="edit-user-form">
+                                <input type="hidden" id="edit-user-id">
+                                <div style="margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #f0f1f3;">
+                                    <h4 style="margin:0 0 14px 0; color:#444; font-size:1em; font-weight:600;">帳號資訊</h4>
+                                    <div style="display:flex; flex-direction:column; gap:13px;">
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">帳號</label>
+                                            <span id="edit-username-display" style="flex:1; color:#333; font-size:14px;"></span>
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">權限</label>
+                                            <select id="edit-role" required style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                                <option value="">請選擇角色</option>
+                                            </select>
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">新密碼</label>
+                                            <input type="password" id="edit-password" placeholder="留空表示不修改" autocomplete="new-password" style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">備註</label>
+                                            <input type="text" id="edit-remark" placeholder="備註" style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:8px; padding-top:6px;">
+                                    <button type="button" onclick="closeEditModal()" style="padding:7px 16px; background:white; color:#666; border:1px solid #d1d5db; border-radius:5px; font-size:14px; cursor:pointer; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#f0f1f3'; this.style.borderColor='#bfc4ca'" onmouseout="this.style.background='white'; this.style.borderColor='#d1d5db'">取消</button>
+                                    <button type="submit" form="edit-user-form" style="padding:7px 20px; background:#409eff; color:white; border:1px solid #409eff; border-radius:5px; font-size:14px; font-weight:500; cursor:pointer; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#2176bd'; this.style.borderColor='#2176bd'" onmouseout="this.style.background='#409eff'; this.style.borderColor='#409eff'">確定</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 <!-- 帳號編輯成功提示框 -->
@@ -227,40 +266,46 @@
                     <!-- 角色列表將由JS動態插入 -->
                 </div>
                 <!-- 編輯角色 Modal -->
-                <div id="edit-role-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
-                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:600px;">
-                        <h3>編輯角色</h3>
-                        <form id="edit-role-form">
-                            <input type="hidden" id="edit-role-id">
-                            <div style="display:flex; gap: 30px;">
-                                <!-- 左邊：基本設定 -->
-                                <div style="flex: 1;">
-                                    <div style="margin-bottom:15px;">
-                                        <label>角色名稱：</label>
-                                        <input type="text" id="edit-role-name" required style="width: 100%;">
-                                    </div>
-                                    <div style="margin-bottom:15px;">
-                                        <label>說明：</label>
-                                        <input type="text" id="edit-role-desc" style="width: 100%;">
-                                    </div>
-                                    <div style="margin-bottom:15px;">
-                                        <label>備註：</label>
-                                        <input type="text" id="edit-role-remark" style="width: 100%;">
+                <div id="edit-role-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); z-index:1000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:0; border-radius:10px; width:540px; max-width:96vw; max-height:80vh; position:relative; box-shadow:0 6px 24px rgba(0,0,0,0.13);">
+                        <!-- 標題欄 -->
+                        <div style="background:#f5f6fa; padding:18px 22px; border-bottom:1px solid #e5e7eb; border-radius:10px 10px 0 0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h3 style="margin:0; font-size:1.15em; font-weight:600; color:#222;">編輯角色</h3>
+                                <button onclick="closeEditRoleModal()" style="background:none; border:none; color:#888; font-size:18px; cursor:pointer; padding:4px; width:28px; height:28px; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#ececec'" onmouseout="this.style.background='none'">×</button>
+                            </div>
+                        </div>
+                        <!-- 內容區域 -->
+                        <div style="padding:22px 22px 18px 22px; overflow-y:auto; max-height:calc(80vh - 120px);">
+                            <form id="edit-role-form">
+                                <input type="hidden" id="edit-role-id">
+                                <div style="margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #f0f1f3;">
+                                    <h4 style="margin:0 0 14px 0; color:#444; font-size:1em; font-weight:600;">角色資訊</h4>
+                                    <div style="display:flex; flex-direction:column; gap:13px;">
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">角色名稱</label>
+                                            <input type="text" id="edit-role-name" required style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">說明</label>
+                                            <input type="text" id="edit-role-desc" style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">備註</label>
+                                            <input type="text" id="edit-role-remark" style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
                                     </div>
                                 </div>
-                                <!-- 右邊：權限設定 -->
-                                <div style="flex: 1;">
-                                    <div style="margin-bottom:15px;">
-                                        <label>權限設定：</label>
-                                        <div id="edit-role-perms"></div>
-                                    </div>
+                                <div style="margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #f0f1f3;">
+                                    <h4 style="margin:0 0 14px 0; color:#444; font-size:1em; font-weight:600;">權限設定</h4>
+                                    <div id="edit-role-perms"></div>
                                 </div>
-                            </div>
-                            <div class="modal-actions">
-                                <button type="button" onclick="closeEditRoleModal()" style="margin-right:10px;">取消</button>
-                                <button type="submit">確定</button>
-                            </div>
-                        </form>
+                                <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:8px; padding-top:6px;">
+                                    <button type="button" onclick="closeEditRoleModal()" style="padding:7px 16px; background:white; color:#666; border:1px solid #d1d5db; border-radius:5px; font-size:14px; cursor:pointer; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#f0f1f3'; this.style.borderColor='#bfc4ca'" onmouseout="this.style.background='white'; this.style.borderColor='#d1d5db'">取消</button>
+                                    <button type="submit" form="edit-role-form" style="padding:7px 20px; background:#409eff; color:white; border:1px solid #409eff; border-radius:5px; font-size:14px; font-weight:500; cursor:pointer; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#2176bd'; this.style.borderColor='#2176bd'" onmouseout="this.style.background='#409eff'; this.style.borderColor='#409eff'">確定</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 <!-- 角色編輯成功提示框 -->
@@ -307,24 +352,38 @@
                     <!-- 類型列表將由JS動態插入 -->
                 </div>
                 <!-- 編輯類型 Modal -->
-                <div id="edit-type-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
-                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:30px; border-radius:8px; min-width:400px;">
-                        <h3>編輯類型</h3>
-                        <form id="edit-type-form">
-                            <input type="hidden" id="edit-type-id">
-                            <div style="margin-bottom:15px;">
-                                <label>類型名稱：</label>
-                                <input type="text" id="edit-type-name" required>
+                <div id="edit-type-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); z-index:1000;">
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:0; border-radius:10px; width:440px; max-height:70vh; position:relative; box-shadow:0 6px 24px rgba(0,0,0,0.13);">
+                        <!-- 標題欄 -->
+                        <div style="background:#f5f6fa; padding:18px 22px; border-bottom:1px solid #e5e7eb; border-radius:10px 10px 0 0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <h3 style="margin:0; font-size:1.15em; font-weight:600; color:#222;">編輯類型</h3>
+                                <button onclick="closeEditTypeModal()" style="background:none; border:none; color:#888; font-size:18px; cursor:pointer; padding:4px; width:28px; height:28px; border-radius:4px; transition:background 0.2s;" onmouseover="this.style.background='#ececec'" onmouseout="this.style.background='none'">×</button>
                             </div>
-                            <div style="margin-bottom:15px;">
-                                <label>描述：</label>
-                                <input type="text" id="edit-type-description">
-                            </div>
-                            <div class="modal-actions">
-                                <button type="button" onclick="closeEditTypeModal()" style="margin-right:10px;">取消</button>
-                                <button type="submit">確定</button>
-                            </div>
-                        </form>
+                        </div>
+                        <!-- 內容區域 -->
+                        <div style="padding:22px 22px 18px 22px; overflow-y:auto; max-height:calc(70vh - 120px);">
+                            <form id="edit-type-form">
+                                <input type="hidden" id="edit-type-id">
+                                <div style="margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid #f0f1f3;">
+                                    <h4 style="margin:0 0 14px 0; color:#444; font-size:1em; font-weight:600;">類型資訊</h4>
+                                    <div style="display:flex; flex-direction:column; gap:13px;">
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">類型名稱</label>
+                                            <input type="text" id="edit-type-name" required style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:12px;">
+                                            <label style="min-width:74px; font-weight:500; color:#555; font-size:0.95em;">描述</label>
+                                            <input type="text" id="edit-type-description" style="flex:1; padding:8px 10px; border:1px solid #d1d5db; border-radius:5px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box; background:#fafbfc;" onfocus="this.style.borderColor='#409eff'" onblur="this.style.borderColor='#d1d5db'">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:8px; padding-top:6px;">
+                                    <button type="button" onclick="closeEditTypeModal()" style="padding:7px 16px; background:white; color:#666; border:1px solid #d1d5db; border-radius:5px; font-size:14px; cursor:pointer; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#f0f1f3'; this.style.borderColor='#bfc4ca'" onmouseout="this.style.background='white'; this.style.borderColor='#d1d5db'">取消</button>
+                                    <button type="submit" form="edit-type-form" style="padding:7px 20px; background:#409eff; color:white; border:1px solid #409eff; border-radius:5px; font-size:14px; font-weight:500; cursor:pointer; transition:background 0.2s, border-color 0.2s;" onmouseover="this.style.background='#2176bd'; this.style.borderColor='#2176bd'" onmouseout="this.style.background='#409eff'; this.style.borderColor='#409eff'">確定</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 <!-- 類型編輯成功提示框 -->
@@ -352,6 +411,29 @@
                         <div class="modal-actions" style="position:static; justify-content:center; gap:18px; margin-top:0;">
                             <button id="delete-type-cancel-btn" type="button" style="margin-right:10px; padding:8px 24px; background:#eee; color:#333; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">取消</button>
                             <button id="delete-type-confirm-btn" type="button" style="padding:8px 24px; background:#F44336; color:white; border:none; border-radius:6px; font-size:1em; cursor:pointer; transition:background 0.2s;">確定刪除</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="tab-content-type-detail" style="display:none;">
+                <h2>類型詳細</h2>
+                <div id="type-detail-section">
+                    <h3>自訂欄位管理</h3>
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:bold;">選擇資產類型：</label>
+                        <select id="asset-type-setting-select" style="width:200px; padding:8px; border:1px solid #ccc; border-radius:4px;">
+                            <option value="">請選擇資產類型</option>
+                        </select>
+                    </div>
+                    
+                    <div id="type-custom-fields-section" style="display:none;">
+                        <div style="margin-bottom:15px;">
+                            <h4 style="margin:0 0 10px 0;">自訂欄位列表</h4>
+                            <div id="type-custom-fields-list" style="margin-bottom:15px;">
+                                <!-- 自訂欄位將在這裡動態顯示 -->
+                            </div>
+                            <button id="add-type-custom-field-btn" type="button" style="padding:8px 16px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer; margin-right:10px;">新增欄位</button>
+                            <button id="type-custom-fields-save-btn" type="button" style="padding:8px 16px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">儲存設定</button>
                         </div>
                     </div>
                 </div>

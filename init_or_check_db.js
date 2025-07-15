@@ -127,6 +127,8 @@ async function main() {
         await ensureColumn('assets', 'type', 'NVARCHAR(100)');
         await ensureColumn('asset_types', 'description', 'NVARCHAR(500)');
         await ensureColumn('assets', 'display_order', 'INT NULL');
+        await ensureColumn('asset_types', 'custom_fields', 'NVARCHAR(MAX)');
+        await ensureColumn('assets', 'custom_field_values', 'NVARCHAR(MAX)');
         
         // 建立預設資料
         await ensureDefaultRoles();

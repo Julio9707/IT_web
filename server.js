@@ -39,7 +39,22 @@ app.get('/api/assets', async (req, res) => {
     try {
         await connectDB();
         const result = await sql.query('SELECT * FROM assets ORDER BY display_order ASC, id ASC');
-        res.json(result.recordset);
+        
+        // 處理 customFieldValues JSON 數據
+        const processedResult = result.recordset.map(record => {
+            if (record.custom_field_values) {
+                try {
+                    record.customFieldValues = JSON.parse(record.custom_field_values);
+                } catch (e) {
+                    record.customFieldValues = {};
+                }
+            } else {
+                record.customFieldValues = {};
+            }
+            return record;
+        });
+        
+        res.json(processedResult);
     } catch (err) {
         handleError(err, res, '資產讀取');
     }
@@ -95,7 +110,7 @@ app.delete('/api/assets/:idx', async (req, res) => {
 // 更新資產
 app.put('/api/assets/:idx', async (req, res) => {
     const idx = parseInt(req.params.idx);
-    const { name, type, owner, location } = req.body;
+    const { name, type, owner, location, customFieldValues } = req.body;
     
     if (isNaN(idx) || idx < 0) {
         return res.status(400).json({ error: '無效的索引' });
@@ -114,9 +129,11 @@ app.put('/api/assets/:idx', async (req, res) => {
         }
         
         const assetId = result.recordset[idx].id;
+        const customFieldValuesJson = customFieldValues ? JSON.stringify(customFieldValues) : null;
+        
         await sql.query`
             UPDATE assets 
-            SET name = ${name}, type = ${type}, owner = ${owner}, location = ${location}
+            SET name = ${name}, type = ${type}, owner = ${owner}, location = ${location}, custom_field_values = ${customFieldValuesJson}
             WHERE id = ${assetId}
         `;
         res.json({ success: true });
@@ -429,7 +446,22 @@ app.get('/api/asset-types', async (req, res) => {
     try {
         await connectDB();
         const result = await sql.query('SELECT * FROM asset_types ORDER BY name');
-        res.json(result.recordset);
+        
+        // 處理 customFields JSON 數據
+        const processedResult = result.recordset.map(record => {
+            if (record.custom_fields) {
+                try {
+                    record.customFields = JSON.parse(record.custom_fields);
+                } catch (e) {
+                    record.customFields = [];
+                }
+            } else {
+                record.customFields = [];
+            }
+            return record;
+        });
+        
+        res.json(processedResult);
     } catch (err) {
         handleError(err, res, '資產類型讀取');
     }
@@ -472,19 +504,33 @@ app.delete('/api/asset-types/:id', async (req, res) => {
 // 更新資產類型
 app.put('/api/asset-types/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const { name, description } = req.body;
+    const { name, description, customFields } = req.body;
     
     if (isNaN(id) || id <= 0) {
         return res.status(400).json({ error: '無效的類型ID' });
     }
     
-    if (!name) {
-        return res.status(400).json({ error: '類型名稱不能為空' });
-    }
-    
     try {
         await connectDB();
-        await sql.query`UPDATE asset_types SET name = ${name}, description = ${description || ''} WHERE id = ${id}`;
+        
+        // 如果只更新自定義欄位，先獲取現有數據
+        if (customFields !== undefined && (name === undefined || description === undefined)) {
+            const currentResult = await sql.query`SELECT name, description FROM asset_types WHERE id = ${id}`;
+            if (currentResult.recordset.length === 0) {
+                return res.status(404).json({ error: '資產類型不存在' });
+            }
+            const current = currentResult.recordset[0];
+            const customFieldsJson = customFields ? JSON.stringify(customFields) : null;
+            await sql.query`UPDATE asset_types SET custom_fields = ${customFieldsJson} WHERE id = ${id}`;
+        } else {
+            // 完整更新
+            if (!name) {
+                return res.status(400).json({ error: '類型名稱不能為空' });
+            }
+            const customFieldsJson = customFields ? JSON.stringify(customFields) : null;
+            await sql.query`UPDATE asset_types SET name = ${name}, description = ${description || ''}, custom_fields = ${customFieldsJson} WHERE id = ${id}`;
+        }
+        
         res.json({ success: true });
     } catch (err) {
         handleError(err, res, '資產類型更新');

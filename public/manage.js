@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContentUser = document.getElementById('tab-content-user');
     const tabContentRole = document.getElementById('tab-content-role');
     const tabContentType = document.getElementById('tab-content-type');
+    const tabContentTypeDetail = document.getElementById('tab-content-type-detail');
 
     // 切換到指定分頁的函數
     function switchToTab(tabName) {
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tabContentUser.style.display = 'none';
         tabContentRole.style.display = 'none';
         tabContentType.style.display = 'none';
+        if (tabContentTypeDetail) tabContentTypeDetail.style.display = 'none';
         
         // 顯示選中的分頁內容
         if (tabName === 'asset') {
@@ -68,6 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (tabName === 'type') {
             tabContentType.style.display = '';
             loadTypes();
+        } else if (tabName === 'type-detail') {
+            if (tabContentTypeDetail) {
+                tabContentTypeDetail.style.display = '';
+                // 只在第一次載入時調用
+                if (tabContentTypeDetail.dataset.loaded !== 'true') {
+                    loadAssetTypeSettingSelect();
+                    tabContentTypeDetail.dataset.loaded = 'true';
+                }
+            }
         }
         
         // 記住當前分頁
@@ -256,12 +267,25 @@ document.addEventListener('DOMContentLoaded', () => {
         editAssetForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const idx = document.getElementById('edit-asset-id').value;
+            
+            // 收集基本欄位
             const asset = {
                 name: document.getElementById('edit-asset-name').value,
                 type: document.getElementById('edit-asset-type').value,
                 owner: document.getElementById('edit-asset-owner').value, // 用途欄位，資料庫欄位名稱保持不變
                 location: document.getElementById('edit-asset-location').value
             };
+            
+            // 收集自定義欄位
+            const customFieldInputs = document.querySelectorAll('#edit-asset-custom-fields-list .custom-field-input');
+            if (customFieldInputs.length > 0) {
+                const customFieldValues = {};
+                customFieldInputs.forEach(input => {
+                    const fieldLabel = input.getAttribute('data-field-label');
+                    customFieldValues[fieldLabel] = input.value;
+                });
+                asset.customFieldValues = customFieldValues;
+            }
             
             fetch(`/api/assets/${idx}`, {
                 method: 'PUT',
@@ -300,6 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('edit-asset-owner').value = owner; // 用途欄位
         document.getElementById('edit-asset-location').value = location;
         
+        // 獲取資產的自定義欄位值
+        const asset = allAssets[idx];
+        const customValues = asset.customFieldValues || {};
+        
         // 載入資產類型到編輯下拉選單
         const editAssetTypeSelect = document.getElementById('edit-asset-type');
         fetch('/api/asset-types')
@@ -315,6 +343,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     editAssetTypeSelect.appendChild(option);
                 });
+                
+                // 載入對應類型的自定義欄位
+                loadAssetCustomFields(type, customValues);
             });
         
         document.getElementById('edit-asset-modal').style.display = 'block';
@@ -675,6 +706,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 typeAddForm.reset();
                 loadTypes();
                 loadAssetTypes();
+                // 重新載入類型詳細頁面的下拉選單
+                reloadAssetTypeSettingSelect();
             });
         });
     }
@@ -710,6 +743,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeEditTypeModal();
                 loadTypes();
                 loadAssetTypes();
+                // 重新載入類型詳細頁面的下拉選單
+                reloadAssetTypeSettingSelect();
                 showTypeSuccessModal();
             });
         });
@@ -738,7 +773,13 @@ document.addEventListener('DOMContentLoaded', () => {
         function onConfirm() {
             fetch(`/api/asset-types/${id}`, { method: 'DELETE' })
                 .then(res => res.json())
-                .then(() => { close(); loadTypes(); loadAssetTypes(); });
+                .then(() => { 
+                    close(); 
+                    loadTypes(); 
+                    loadAssetTypes();
+                    // 重新載入類型詳細頁面的下拉選單
+                    reloadAssetTypeSettingSelect();
+                });
         }
         cancelBtn.addEventListener('click', onCancel);
         confirmBtn.addEventListener('click', onConfirm);
@@ -806,4 +847,227 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAssetTypes();
     loadRoleOptions(); // 載入角色選項
     loadRoles(); // 載入角色列表
+
+    // ========== 新增類型詳細功能 ==========
+    
+    // 儲存目前選擇的資產類型與欄位
+    let currentTypeId = null;
+    let currentCustomFields = [];
+
+    // 載入資產類型到下拉選單
+    async function loadAssetTypeSettingSelect() {
+        const select = document.getElementById('asset-type-setting-select');
+        if (!select) return;
+        
+        // 檢查是否已經載入過，避免重複載入
+        if (select.children.length > 1) {
+            return;
+        }
+        
+        select.innerHTML = '<option value="">請選擇資產類型</option>';
+        try {
+            const res = await fetch('/api/asset-types');
+            const types = await res.json();
+            types.forEach(type => {
+                const opt = document.createElement('option');
+                opt.value = type.id;
+                opt.textContent = type.name;
+                select.appendChild(opt);
+            });
+        } catch (e) {
+            alert('載入資產類型失敗');
+        }
+    }
+
+    // 重新載入類型詳細頁面的下拉選單
+    async function reloadAssetTypeSettingSelect() {
+        const select = document.getElementById('asset-type-setting-select');
+        if (!select) return;
+        
+        const currentValue = select.value; // 保存當前選中的值
+        select.innerHTML = '<option value="">請選擇資產類型</option>';
+        try {
+            const res = await fetch('/api/asset-types');
+            const types = await res.json();
+            types.forEach(type => {
+                const opt = document.createElement('option');
+                opt.value = type.id;
+                opt.textContent = type.name;
+                select.appendChild(opt);
+            });
+            // 恢復之前選中的值
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        } catch (e) {
+            alert('載入資產類型失敗');
+        }
+    }
+
+    // 顯示自訂欄位
+    function renderCustomFields() {
+        const fieldsList = document.getElementById('type-custom-fields-list');
+        if (!fieldsList) return;
+        fieldsList.innerHTML = '';
+        currentCustomFields.forEach((field, idx) => {
+            const div = document.createElement('div');
+            div.style.marginBottom = '6px';
+            div.innerHTML = `
+                <input type="text" value="${field.label}" data-idx="${idx}" style="margin-right:8px; padding:6px; border:1px solid #ccc; border-radius:4px; width:200px;">
+                <button type="button" class="delete-custom-field-btn" data-idx="${idx}" style="padding:6px 12px; background:#f44336; color:white; border:none; border-radius:4px; cursor:pointer;">刪除</button>
+            `;
+            fieldsList.appendChild(div);
+        });
+    }
+
+    // 切換資產類型時載入欄位
+    document.getElementById('asset-type-setting-select')?.addEventListener('change', async function() {
+        currentTypeId = this.value;
+        currentCustomFields = [];
+        const section = document.getElementById('type-custom-fields-section');
+        
+        if (!currentTypeId) {
+            section.style.display = 'none';
+            return;
+        }
+        
+        try {
+            const res = await fetch('/api/asset-types');
+            const types = await res.json();
+            const type = types.find(t => t.id == currentTypeId);
+            if (type && Array.isArray(type.customFields)) {
+                currentCustomFields = type.customFields.map(f => ({ label: f.label }));
+            }
+            renderCustomFields();
+            section.style.display = 'block';
+        } catch (e) {
+            alert('載入自訂欄位失敗');
+        }
+    });
+
+    // 新增欄位
+    document.getElementById('add-type-custom-field-btn')?.addEventListener('click', function() {
+        currentCustomFields.push({ label: '' });
+        renderCustomFields();
+    });
+
+    // 刪除欄位（事件委派）
+    document.getElementById('type-custom-fields-list')?.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-custom-field-btn')) {
+            const idx = e.target.getAttribute('data-idx');
+            currentCustomFields.splice(idx, 1);
+            renderCustomFields();
+        }
+    });
+
+    // 編輯欄位名稱（事件委派）
+    document.getElementById('type-custom-fields-list')?.addEventListener('input', function(e) {
+        if (e.target.tagName === 'INPUT') {
+            const idx = e.target.getAttribute('data-idx');
+            currentCustomFields[idx].label = e.target.value;
+        }
+    });
+
+    // 儲存
+    document.getElementById('type-custom-fields-save-btn')?.addEventListener('click', async function() {
+        if (!currentTypeId) {
+            alert('請先選擇資產類型');
+            return;
+        }
+        // 過濾空白欄位
+        const fieldsToSave = currentCustomFields.filter(f => f.label.trim() !== '');
+        try {
+            const res = await fetch(`/api/asset-types/${currentTypeId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customFields: fieldsToSave })
+            });
+            if (res.ok) {
+                alert('自訂欄位已儲存');
+                // 重新載入
+                document.getElementById('asset-type-setting-select').dispatchEvent(new Event('change'));
+            } else {
+                alert('儲存失敗');
+            }
+        } catch (e) {
+            alert('儲存失敗');
+        }
+    });
+
+    // ========== 資產編輯自定義欄位功能 ==========
+    
+    // 載入資產的自定義欄位
+    async function loadAssetCustomFields(assetTypeName, assetCustomValues = {}) {
+        const customFieldsSection = document.getElementById('edit-asset-custom-fields-section');
+        const customFieldsList = document.getElementById('edit-asset-custom-fields-list');
+        
+        if (!customFieldsSection || !customFieldsList) return;
+        
+        try {
+            const res = await fetch('/api/asset-types');
+            const types = await res.json();
+            const selectedType = types.find(t => t.name === assetTypeName);
+            
+            if (selectedType && Array.isArray(selectedType.customFields) && selectedType.customFields.length > 0) {
+                // 顯示自定義欄位區域
+                customFieldsSection.style.display = 'block';
+                customFieldsList.innerHTML = '';
+                
+                // 渲染自定義欄位
+                const fieldsContainer = document.createElement('div');
+                fieldsContainer.style.display = 'flex';
+                fieldsContainer.style.flexDirection = 'column';
+                fieldsContainer.style.gap = '16px';
+                
+                selectedType.customFields.forEach(field => {
+                    const div = document.createElement('div');
+                    const fieldValue = assetCustomValues[field.label] || '';
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.gap = '16px';
+                    div.innerHTML = `
+                        <label style="min-width:80px; font-weight:500; color:#495057; font-size:0.9em;">${field.label}</label>
+                        <input type="text" 
+                               class="custom-field-input" 
+                               data-field-label="${field.label}"
+                               value="${fieldValue}"
+                               placeholder="請輸入${field.label}"
+                               style="flex:1; padding:10px 12px; border:1px solid #ced4da; border-radius:6px; font-size:14px; transition:border-color 0.2s; box-sizing:border-box;"
+                               onfocus="this.style.borderColor='#007bff'"
+                               onblur="this.style.borderColor='#ced4da'">
+                    `;
+                    fieldsContainer.appendChild(div);
+                });
+                
+                customFieldsList.appendChild(fieldsContainer);
+            } else {
+                // 隱藏自定義欄位區域
+                customFieldsSection.style.display = 'none';
+            }
+        } catch (e) {
+            console.error('載入自定義欄位失敗:', e);
+            customFieldsSection.style.display = 'none';
+        }
+    }
+    
+    // 監聽編輯資產類型選擇的變化
+    document.getElementById('edit-asset-type')?.addEventListener('change', function() {
+        const selectedType = this.value;
+        if (selectedType) {
+            // 獲取當前資產的自定義欄位值
+            const idx = document.getElementById('edit-asset-id').value;
+            const asset = allAssets[idx];
+            const customValues = asset ? (asset.customFieldValues || {}) : {};
+            loadAssetCustomFields(selectedType, customValues);
+        } else {
+            // 隱藏自定義欄位區域
+            const customFieldsSection = document.getElementById('edit-asset-custom-fields-section');
+            if (customFieldsSection) {
+                customFieldsSection.style.display = 'none';
+            }
+        }
+    });
+
+    // 初始化載入
+    loadAssetTypeSettingSelect();
 }); 
