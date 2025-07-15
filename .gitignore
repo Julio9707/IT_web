@@ -43,5 +43,7 @@ todo.txt
 ### Target ###
 /target/
 /node_modules/
-/web/node_modules/
-/log/
+
+## disk ###
+assets.json
+/logs
